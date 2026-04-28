@@ -6,52 +6,51 @@
     <title>Metal Heritage | Official Archive</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        :root { --accent: #00ff41; --bg: #000; --card: rgba(20,20,20,0.95); }
+        :root { --accent: #00ff41; --bg: #000; --card: rgba(15,15,15,0.98); }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
         
-        body { background: var(--bg); color: #fff; overflow: hidden; height: 100dvh; width: 100vw; }
+        body { background: var(--bg); color: #fff; overflow: hidden; height: 100dvh; width: 100vw; position: relative; }
 
-        /* COLLAGE FONDO */
+        /* COLLAGE */
         .bg-collage {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -1; display: grid; grid-template-columns: 1fr 1fr;
-            grid-template-rows: 1fr 1fr; filter: brightness(0.3);
+            z-index: -1; display: grid; grid-template-columns: 1fr 1fr; filter: brightness(0.25);
         }
-        .bg-item { background-size: cover; background-position: center; border: 0.5px solid #111; }
+        .bg-item { background-size: cover; background-position: center; border: 1px solid #111; }
 
         /* VISTAS */
         .view {
             display: none; height: 100dvh; width: 100vw; padding: 20px;
             flex-direction: column; justify-content: center; align-items: center;
-            position: absolute; top: 0; left: 0; background: rgba(0,0,0,0.4);
+            position: absolute; top: 0; left: 0; background: rgba(0,0,0,0.5);
         }
         .active { display: flex; z-index: 10; }
 
-        /* BOTONES GENERALES */
-        .btn { background: #fff; color: #000; padding: 12px 25px; border-radius: 30px; border: none; font-weight: 900; cursor: pointer; text-transform: uppercase; }
-        .btn-back { position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.8); color: #fff; border: 1px solid #444; padding: 8px 15px; border-radius: 5px; z-index: 100; }
+        /* BOTONES */
+        .btn { background: #fff; color: #000; padding: 14px 28px; border-radius: 30px; border: none; font-weight: 900; cursor: pointer; }
+        .btn-back { position: absolute; top: 25px; left: 20px; background: #222; color: #fff; border: 1px solid #444; padding: 10px 15px; border-radius: 8px; z-index: 100; font-weight: bold; }
 
         /* MENU */
         .menu-grid { display: grid; grid-template-columns: repeat(2, 160px); gap: 15px; }
-        @media (max-width: 400px) { .menu-grid { grid-template-columns: 1fr; width: 80%; } }
-        .menu-card { background: var(--card); padding: 25px; border-radius: 12px; border: 1px solid #333; text-align: center; cursor: pointer; }
+        @media (max-width: 450px) { .menu-grid { grid-template-columns: 1fr; width: 85%; } }
+        .menu-card { background: var(--card); padding: 30px; border-radius: 15px; border: 1px solid #333; text-align: center; cursor: pointer; }
 
-        /* TRADUCTOR Y CONTENEDORES */
-        .glass-panel { background: var(--card); padding: 25px; border-radius: 15px; border: 1px solid #444; width: 90%; max-width: 450px; }
-        input, select { width: 100%; background: #000; border: 1px solid #444; color: #fff; padding: 12px; margin: 10px 0; border-radius: 5px; }
+        /* PANELES */
+        .panel { background: var(--card); padding: 30px; border-radius: 20px; border: 1px solid #444; width: 95%; max-width: 480px; text-align: center; }
+        input, select { width: 100%; background: #000; border: 1px solid #444; color: #fff; padding: 12px; margin: 12px 0; border-radius: 8px; font-size: 1rem; }
 
         /* JUEGO */
-        canvas { background: #000; border: 2px solid #222; max-width: 100%; height: auto; }
-        .game-ui { width: 100%; max-width: 350px; display: flex; justify-content: space-between; color: var(--accent); font-family: monospace; margin-bottom: 5px; }
+        canvas { background: #000; border: 2px solid #333; max-width: 100%; box-shadow: 0 0 20px rgba(0,255,65,0.2); }
+        .game-header { width: 100%; max-width: 350px; display: flex; justify-content: space-between; color: var(--accent); font-family: monospace; margin-bottom: 8px; font-weight: bold; }
         
-        /* CONTROLES MÓVILES */
-        .controls { display: flex; width: 100%; max-width: 400px; justify-content: space-between; align-items: center; margin-top: 20px; }
-        .dpad { display: flex; gap: 10px; }
-        .ctrl-btn { width: 65px; height: 65px; background: rgba(255,255,255,0.1); border: 2px solid #555; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: #fff; user-select: none; }
-        .fire-btn { width: 80px; height: 80px; background: rgba(255,0,0,0.3); border: 2px solid red; }
+        /* CONTROLES TÁCTILES */
+        .game-controls { display: flex; width: 100%; max-width: 400px; justify-content: space-between; align-items: center; margin-top: 25px; padding: 0 10px; }
+        .dpad { display: flex; gap: 15px; }
+        .tap-btn { width: 75px; height: 75px; background: rgba(255,255,255,0.08); border: 2px solid #555; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; color: #fff; }
+        .fire-btn { width: 90px; height: 90px; background: rgba(255,0,0,0.15); border: 3px solid #ff4444; font-size: 2rem; }
 
         /* REPRODUCTOR */
-        .player-bar { position: fixed; bottom: 0; left: 0; width: 100%; height: 80px; background: rgba(10,10,10,0.98); border-top: 1px solid #333; display: none; align-items: center; padding: 0 20px; z-index: 500; }
+        .player-bar { position: fixed; bottom: 0; left: 0; width: 100%; height: 90px; background: #0a0a0a; border-top: 1px solid #222; display: none; align-items: center; padding: 0 25px; z-index: 500; }
     </style>
 </head>
 <body>
@@ -66,12 +65,12 @@
     <audio id="mainAudio"></audio>
 
     <section id="welcome" class="view active">
-        <h1 style="font-size: 4rem; letter-spacing: -2px;">METAL.</h1>
-        <button class="btn" onclick="nav('menu')">INGRESAR</button>
+        <h1 style="font-size: 4.5rem; font-weight: 900; letter-spacing: -4px;">METAL.</h1>
+        <button class="btn" onclick="nav('menu')">ENTRAR</button>
     </section>
 
     <section id="menu" class="view">
-        <button class="btn-back" onclick="nav('welcome')">← SALIR</button>
+        <button class="btn-back" onclick="nav('welcome')">SALIR</button>
         <div class="menu-grid">
             <div class="menu-card" onclick="nav('history')">HISTORIA</div>
             <div class="menu-card" onclick="nav('translator-view')">TRADUCTOR</div>
@@ -81,63 +80,63 @@
     </section>
 
     <section id="history" class="view">
-        <button class="btn-back" onclick="nav('menu')">← MENÚ</button>
-        <div class="glass-panel">
-            <h2 style="color:var(--accent)">EL ACCIDENTE</h2>
-            <p id="hText" style="margin:15px 0; line-height:1.6;">Tony Iommi perdió las puntas de sus dedos en una fábrica. Al usar prótesis y cuerdas flojas, creó el sonido pesado del Heavy Metal.</p>
-            <button class="btn" onclick="speak()" style="width:100%">ESCUCHAR</button>
+        <button class="btn-back" onclick="nav('menu')">VOLVER</button>
+        <div class="panel">
+            <h2 style="color:var(--accent); margin-bottom: 15px;">RIFFS DE ACERO</h2>
+            <p id="hText" style="text-align: justify; font-size: 1.1rem; line-height: 1.5;">Tony Iommi, guitarrista de Black Sabbath, perdió las falanges de sus dedos en un accidente. Al bajar la tensión de las cuerdas para poder tocar, creó el tono pesado que definió al género.</p>
+            <button class="btn" onclick="speak()" style="width:100%; margin-top:20px;">🔊 ESCUCHAR</button>
         </div>
     </section>
 
     <section id="translator-view" class="view">
-        <button class="btn-back" onclick="nav('menu')">← MENÚ</button>
-        <div class="glass-panel">
-            <h3>TRADUCTOR</h3>
-            <select id="langTarget">
-                <option value="en">Inglés</option>
-                <option value="de">Alemán</option>
-                <option value="pt">Portugués</option>
-                <option value="it">Italiano</option>
+        <button class="btn-back" onclick="nav('menu')">VOLVER</button>
+        <div class="panel">
+            <h2 style="margin-bottom:10px;">TRADUCTOR</h2>
+            <select id="targetLang">
+                <option value="en">Inglés (English)</option>
+                <option value="de">Alemán (Deutsch)</option>
+                <option value="pt">Portugués (Português)</option>
+                <option value="fr">Francés (Français)</option>
             </select>
-            <input type="text" id="tInput" placeholder="Mensaje en español...">
-            <button class="btn" onclick="translateNow()" style="width:100%">TRADUCIR</button>
-            <div id="tOutput" style="margin-top:15px; color:var(--accent); font-family:monospace; min-height:40px;">...</div>
+            <input type="text" id="sourceText" placeholder="Escribe en español...">
+            <button class="btn" onclick="runTranslation()" style="width:100%">TRADUCIR AHORA</button>
+            <div id="resultText" style="margin-top:20px; padding:15px; background:#000; border:1px solid #333; color:var(--accent); font-family:monospace; min-height:60px; word-break: break-word;">...</div>
         </div>
     </section>
 
     <section id="game-view" class="view">
-        <button class="btn-back" onclick="stopGame(); nav('menu');">← VOLVER</button>
-        <div class="game-ui">
-            <span>ARCADE V.1</span>
-            <span id="scoreText">SCORE: 0</span>
+        <button class="btn-back" onclick="stopGame(); nav('menu');">MENU</button>
+        <div class="game-header">
+            <span>STARFLIGHT</span>
+            <span id="scoreVal">SCORE: 0</span>
         </div>
-        <canvas id="gameCanvas" width="350" height="400"></canvas>
+        <canvas id="gameCanvas" width="350" height="420"></canvas>
         
-        <div class="controls">
+        <div class="game-controls">
             <div class="dpad">
-                <div class="ctrl-btn" ontouchstart="keys['ArrowLeft']=true" ontouchend="keys['ArrowLeft']=false">←</div>
-                <div class="ctrl-btn" ontouchstart="keys['ArrowRight']=true" ontouchend="keys['ArrowRight']=false">→</div>
+                <div class="tap-btn" ontouchstart="keys['ArrowLeft']=true" ontouchend="keys['ArrowLeft']=false">←</div>
+                <div class="tap-btn" ontouchstart="keys['ArrowRight']=true" ontouchend="keys['ArrowRight']=false">→</div>
             </div>
-            <div class="ctrl-btn fire-btn" ontouchstart="shoot()">🔥</div>
+            <div class="tap-btn fire-btn" ontouchstart="shoot()">🔥</div>
         </div>
     </section>
 
     <section id="credits" class="view">
-        <button class="btn-back" onclick="nav('menu')">← MENÚ</button>
-        <h1 style="font-size:2rem;">JUAN ANDRES TELLEZ</h1>
-        <p>GRADO 10A</p>
+        <button class="btn-back" onclick="nav('menu')">VOLVER</button>
+        <h1 style="font-size: 2.2rem;">JUAN ANDRÉS TÉLLEZ</h1>
+        <p style="margin-top: 10px; border: 1px solid #fff; padding: 5px 20px;">GRADO 10A</p>
     </section>
 
     <div class="player-bar" id="player">
-        <div style="font-size:1.2rem; margin-right:10px;">🎸</div>
-        <div style="flex:1 overflow:hidden;">
-            <b id="sTitle" style="display:block; font-size:0.9rem; white-space:nowrap;">War Pigs</b>
-            <small id="sArtist" style="color:grey; font-size:0.7rem;">Black Sabbath</small>
+        <div style="font-size:1.8rem; margin-right:15px;">🎸</div>
+        <div style="flex:1; overflow:hidden;">
+            <b id="playTitle" style="display:block; font-size:0.9rem; white-space:nowrap;">War Pigs</b>
+            <small id="playArtist" style="color:#777; font-size:0.75rem;">Black Sabbath</small>
         </div>
-        <div style="display:flex; gap:15px; font-size:1.4rem;">
-            <span onclick="prevS()">⏮</span>
-            <span id="playB" onclick="toggleP()">⏸</span>
-            <span onclick="nextS()">⏭</span>
+        <div style="display:flex; gap:18px; font-size:1.6rem; cursor:pointer;">
+            <span onclick="changeS(-1)">⏮</span>
+            <span id="pBtn" onclick="pausePlay()">⏸</span>
+            <span onclick="changeS(1)">⏭</span>
         </div>
     </div>
 
@@ -149,96 +148,103 @@
             document.getElementById('player').style.display = (id === 'welcome') ? 'none' : 'flex';
         }
 
-        // --- TRADUCTOR REAL ---
-        async function translateNow() {
-            const text = document.getElementById('tInput').value;
-            const target = document.getElementById('langTarget').value;
-            const out = document.getElementById('tOutput');
+        // --- TRADUCTOR (API FIX) ---
+        async function runTranslation() {
+            const text = document.getElementById('sourceText').value;
+            const lang = document.getElementById('targetLang').value;
+            const box = document.getElementById('resultText');
             if(!text) return;
-            out.innerText = "Traduciendo...";
+            box.innerText = "Traduciendo...";
             try {
-                const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=es|${target}`);
+                // Se fuerza el par de idiomas ES (Español) a LANG (Destino)
+                const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=es|${lang}`;
+                const res = await fetch(url);
                 const data = await res.json();
-                out.innerText = data.responseData.translatedText;
-            } catch (e) { out.innerText = "Error de conexión."; }
+                box.innerText = data.responseData.translatedText;
+            } catch (e) { box.innerText = "Error de red."; }
         }
 
         // --- VOZ ---
         function speak() {
             window.speechSynthesis.cancel();
-            const msg = new SpeechSynthesisUtterance(document.getElementById('hText').innerText);
-            msg.lang = 'es-ES';
-            window.speechSynthesis.speak(msg);
+            const speech = new SpeechSynthesisUtterance(document.getElementById('hText').innerText);
+            speech.lang = 'es-ES';
+            window.speechSynthesis.speak(speech);
         }
 
-        // --- AUDIO ---
+        // --- MÚSICA ---
         const audio = document.getElementById('mainAudio');
-        const playlist = [
+        const tracks = [
             {t:"The Trooper", a:"Iron Maiden", f:"thetrooper.mp3"},
             {t:"Painkiller", a:"Judas Priest", f:"painkiller.mp3"},
             {t:"Holy Diver", a:"Dio", f:"holydiver.mp3"},
             {t:"War Pigs", a:"Black Sabbath", f:"warpigs.mp3"}
         ];
-        let sIdx = 3;
+        let currentIdx = 3;
 
-        function loadS(i) {
-            const s = playlist[i];
-            document.getElementById('sTitle').innerText = s.t;
-            document.getElementById('sArtist').innerText = s.a;
+        function loadT(i) {
+            const s = tracks[i];
+            document.getElementById('playTitle').innerText = s.t;
+            document.getElementById('playArtist').innerText = s.a;
             audio.src = s.f; audio.play().catch(()=>{});
-            document.getElementById('playB').innerText = "⏸";
+            document.getElementById('pBtn').innerText = "⏸";
         }
-        function toggleP() { audio.paused ? (audio.play(), document.getElementById('playB').innerText="⏸") : (audio.pause(), document.getElementById('playB').innerText="▶"); }
-        function nextS() { sIdx = (sIdx+1)%playlist.length; loadS(sIdx); }
-        function prevS() { sIdx = (sIdx-1+playlist.length)%playlist.length; loadS(sIdx); }
+        function pausePlay() { audio.paused ? (audio.play(), document.getElementById('pBtn').innerText="⏸") : (audio.pause(), document.getElementById('pBtn').innerText="▶"); }
+        function changeS(dir) { currentIdx = (currentIdx + dir + tracks.length) % tracks.length; loadT(currentIdx); }
 
-        // --- JUEGO STARFLIGHT ---
+        // --- JUEGO (LÓGICA ARCADE) ---
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         let gameActive = false, score = 0, keys = {}, bullets = [], enemies = [];
-        let player = { x: 160, y: 340, w: 30, h: 30 };
+        let player = { x: 160, y: 360, w: 30, h: 30 };
 
         window.onkeydown = e => keys[e.code] = true;
         window.onkeyup = e => keys[e.code] = false;
 
-        function shoot() { if(gameActive) bullets.push({ x: player.x+13, y: player.y, s: 8 }); }
+        function shoot() { if(gameActive) bullets.push({ x: player.x+13, y: player.y, s: 9 }); }
 
         function startGame() {
             gameActive = true; score = 0; enemies = []; bullets = [];
-            document.getElementById('scoreText').innerText = "SCORE: 0";
-            if(!audio.src) loadS(sIdx);
-            if(window.gameInt) clearInterval(window.gameInt);
-            window.gameInt = setInterval(() => { if(gameActive) enemies.push({x:Math.random()*320, y:-30, s:3}); }, 1000);
+            document.getElementById('scoreVal').innerText = "SCORE: 0";
+            if(!audio.src) loadT(currentIdx);
+            if(window.spawnInt) clearInterval(window.spawnInt);
+            window.spawnInt = setInterval(() => { if(gameActive) enemies.push({x:Math.random()*320, y:-30, s:3.2}); }, 900);
             gameLoop();
         }
 
-        function stopGame() { gameActive = false; clearInterval(window.gameInt); }
+        function stopGame() { gameActive = false; clearInterval(window.spawnInt); }
 
         function gameLoop() {
             if(!gameActive) return;
-            // Movimiento
-            if(keys['ArrowLeft'] && player.x > 0) player.x -= 5;
-            if(keys['ArrowRight'] && player.x < 320) player.x += 5;
+            // Movimiento PC/Teclas
+            if(keys['ArrowLeft'] && player.x > 0) player.x -= 6;
+            if(keys['ArrowRight'] && player.x < 320) player.x += 6;
 
-            // Update
-            ctx.fillStyle = "#000"; ctx.fillRect(0,0,350,400);
+            ctx.fillStyle = "#000"; ctx.fillRect(0,0,350,420);
             
+            // Proyectiles
             bullets.forEach((b, i) => {
-                b.y -= b.s; ctx.fillStyle = "red"; ctx.fillRect(b.x, b.y, 4, 10);
+                b.y -= b.s; ctx.fillStyle = "#ff4444"; ctx.fillRect(b.x, b.y, 4, 12);
                 if(b.y < 0) bullets.splice(i, 1);
             });
 
+            // Enemigos
             enemies.forEach((e, i) => {
-                e.y += e.s; ctx.fillStyle = "#00ff41"; ctx.fillRect(e.x, e.y, 30, 30);
+                e.y += e.s; ctx.fillStyle = varColor = (score > 100) ? "#ff00ff" : "#00ff41";
+                ctx.fillRect(e.x, e.y, 30, 30);
+                
+                // Colisión
                 bullets.forEach((b, bi) => {
                     if(b.x > e.x && b.x < e.x+30 && b.y > e.y && b.y < e.y+30) {
                         enemies.splice(i, 1); bullets.splice(bi, 1);
-                        score += 10; document.getElementById('scoreText').innerText = "SCORE: " + score;
+                        score += 10; document.getElementById('scoreVal').innerText = "SCORE: " + score;
                     }
                 });
-                if(e.y > 400) { stopGame(); alert("GAME OVER"); nav('menu'); }
+
+                if(e.y > 420) { stopGame(); alert("FIN DEL JUEGO\nSCORE: " + score); nav('menu'); }
             });
 
+            // Nave
             ctx.fillStyle = "#fff"; ctx.fillRect(player.x, player.y, 30, 30);
             requestAnimationFrame(gameLoop);
         }
