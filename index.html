@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Metal Heritage | Archive</title>
+    <title>Metal Heritage Archive</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         :root { --accent: #00ff41; --bg: #000; --card: rgba(15,15,15,0.98); }
@@ -26,8 +26,9 @@
         }
         .active { display: flex; z-index: 10; }
 
-        /* BOTONES */
-        .btn { background: #fff; color: #000; padding: 14px 28px; border-radius: 30px; border: none; font-weight: 900; cursor: pointer; text-transform: uppercase; }
+        /* BOTONES UI */
+        .btn { background: #fff; color: #000; padding: 14px 28px; border-radius: 30px; border: none; font-weight: 900; cursor: pointer; text-transform: uppercase; transition: 0.2s; }
+        .btn:active { transform: scale(0.95); }
         .btn-back { position: absolute; top: 25px; left: 20px; background: #222; color: #fff; border: 1px solid #444; padding: 10px 15px; border-radius: 8px; z-index: 100; font-weight: bold; }
 
         /* MENU */
@@ -37,7 +38,8 @@
 
         /* PANELES */
         .panel { background: var(--card); padding: 30px; border-radius: 20px; border: 1px solid #444; width: 95%; max-width: 480px; text-align: center; }
-        input { width: 100%; background: #000; border: 1px solid #444; color: #fff; padding: 15px; margin: 15px 0; border-radius: 8px; font-size: 1rem; }
+        input { width: 100%; background: #000; border: 1px solid #444; color: #fff; padding: 15px; margin: 15px 0; border-radius: 8px; font-size: 1rem; outline: none; }
+        input:focus { border-color: var(--accent); }
 
         /* JUEGO */
         canvas { background: #000; border: 2px solid #333; max-width: 100%; box-shadow: 0 0 20px rgba(0,255,65,0.1); }
@@ -61,7 +63,7 @@
         <div class="bg-item" style="background-image: url('sabbath.avif');"></div>
     </div>
 
-    <audio id="mainAudio"></audio>
+    <audio id="mainAudio" preload="auto"></audio>
 
     <section id="welcome" class="view active">
         <h1 style="font-size: 4.5rem; font-weight: 900; letter-spacing: -4px;">METAL.</h1>
@@ -82,7 +84,7 @@
         <button class="btn-back" onclick="nav('menu')">VOLVER</button>
         <div class="panel">
             <h2 style="color:var(--accent); margin-bottom: 15px;">RIFFS DE ACERO</h2>
-            <p id="hText" style="text-align: justify; font-size: 1.1rem; line-height: 1.5;">Tony Iommi, guitarrista de Black Sabbath, perdió las falanges de sus dedos en un accidente. Al bajar la tensión de las cuerdas para poder tocar, creó el tono pesado que definió al género.</p>
+            <p id="hText" style="text-align: justify; font-size: 1.1rem; line-height: 1.5;">Tony Iommi, guitarrista de Black Sabbath, perdió las falanges de sus dedos en un accidente industrial. Al usar prótesis y bajar la tensión de las cuerdas, creó el tono pesado y oscuro que definió al Heavy Metal.</p>
             <button class="btn" onclick="speak()" style="width:100%; margin-top:20px;">🔊 ESCUCHAR</button>
         </div>
     </section>
@@ -94,14 +96,14 @@
             <p style="color: #888; font-size: 0.9rem; margin-bottom: 10px;">ESPAÑOL ➔ INGLÉS</p>
             <input type="text" id="sourceText" placeholder="Escribe en español...">
             <button class="btn" onclick="runTranslation()" style="width:100%">TRADUCIR</button>
-            <div id="resultText" style="margin-top:20px; padding:15px; background:#000; border:1px solid #333; color:var(--accent); font-family:monospace; min-height:60px; border-radius: 8px;">...</div>
+            <div id="resultText" style="margin-top:20px; padding:15px; background:#000; border:1px solid #333; color:var(--accent); font-family:monospace; min-height:60px; border-radius: 8px; word-wrap: break-word;">...</div>
         </div>
     </section>
 
     <section id="game-view" class="view">
         <button class="btn-back" onclick="stopGame(); nav('menu');">MENU</button>
         <div class="game-header">
-            <span>STARFLIGHT</span>
+            <span>STARFLIGHT ARCADE</span>
             <span id="scoreVal">SCORE: 0</span>
         </div>
         <canvas id="gameCanvas" width="350" height="420"></canvas>
@@ -124,8 +126,8 @@
     <div class="player-bar" id="player">
         <div style="font-size:1.8rem; margin-right:15px;">🎸</div>
         <div style="flex:1; overflow:hidden;">
-            <b id="playTitle" style="display:block; font-size:0.9rem; white-space:nowrap;">War Pigs</b>
-            <small id="playArtist" style="color:#777; font-size:0.75rem;">Black Sabbath</small>
+            <b id="playTitle" style="display:block; font-size:0.9rem; white-space:nowrap;">Cargando...</b>
+            <small id="playArtist" style="color:#777; font-size:0.75rem;">Metal Radio</small>
         </div>
         <div style="display:flex; gap:18px; font-size:1.6rem; cursor:pointer;">
             <span onclick="changeS(-1)">⏮</span>
@@ -135,10 +137,56 @@
     </div>
 
     <script>
+        const audio = document.getElementById('mainAudio');
+        const tracks = [
+            {t:"The Trooper", a:"Iron Maiden", f:"thetrooper.mp3"},
+            {t:"Painkiller", a:"Judas Priest", f:"painkiller.mp3"},
+            {t:"Holy Diver", a:"Dio", f:"holydiver.mp3"},
+            {t:"War Pigs", a:"Black Sabbath", f:"warpigs.mp3"}
+        ];
+        let currentIdx = 0;
+
+        // --- NAVEGACIÓN ---
         function nav(id) {
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
             document.getElementById(id).classList.add('active');
-            document.getElementById('player').style.display = (id === 'welcome') ? 'none' : 'flex';
+            
+            const pBar = document.getElementById('player');
+            if(id === 'welcome') {
+                pBar.style.display = 'none';
+            } else {
+                pBar.style.display = 'flex';
+                if(!audio.src) loadT(currentIdx); // Carga la primera al entrar
+            }
+        }
+
+        // --- REPRODUCTOR DE AUDIO ---
+        function loadT(i) {
+            const s = tracks[i];
+            document.getElementById('playTitle').innerText = s.t;
+            document.getElementById('playArtist').innerText = s.a;
+            
+            audio.pause();
+            audio.src = s.f;
+            audio.load(); 
+            audio.play().then(() => {
+                document.getElementById('pBtn').innerText = "⏸";
+            }).catch(e => console.log("Interacción requerida para audio"));
+        }
+
+        function pausePlay() {
+            if (audio.paused) {
+                audio.play();
+                document.getElementById('pBtn').innerText = "⏸";
+            } else {
+                audio.pause();
+                document.getElementById('pBtn').innerText = "▶";
+            }
+        }
+
+        function changeS(dir) {
+            currentIdx = (currentIdx + dir + tracks.length) % tracks.length;
+            loadT(currentIdx);
         }
 
         // --- TRADUCTOR (SOLO INGLÉS) ---
@@ -148,42 +196,23 @@
             if(!text) return;
             box.innerText = "Traduciendo...";
             try {
-                // Forzado estricto: langpair=es|en
+                // langpair=es|en asegura que siempre traduzca de español a inglés
                 const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=es|en`);
                 const data = await res.json();
                 box.innerText = data.responseData.translatedText;
-            } catch (e) { box.innerText = "Error de red."; }
+            } catch (e) { box.innerText = "Error de conexión."; }
         }
 
-        // --- VOZ ---
+        // --- SINTETIZADOR DE VOZ ---
         function speak() {
             window.speechSynthesis.cancel();
             const speech = new SpeechSynthesisUtterance(document.getElementById('hText').innerText);
             speech.lang = 'es-ES';
+            speech.rate = 0.9;
             window.speechSynthesis.speak(speech);
         }
 
-        // --- MÚSICA ---
-        const audio = document.getElementById('mainAudio');
-        const tracks = [
-            {t:"The Trooper", a:"Iron Maiden", f:"thetrooper.mp3"},
-            {t:"Painkiller", a:"Judas Priest", f:"painkiller.mp3"},
-            {t:"Holy Diver", a:"Dio", f:"holydiver.mp3"},
-            {t:"War Pigs", a:"Black Sabbath", f:"warpigs.mp3"}
-        ];
-        let currentIdx = 3;
-
-        function loadT(i) {
-            const s = tracks[i];
-            document.getElementById('playTitle').innerText = s.t;
-            document.getElementById('playArtist').innerText = s.a;
-            audio.src = s.f; audio.play().catch(()=>{});
-            document.getElementById('pBtn').innerText = "⏸";
-        }
-        function pausePlay() { audio.paused ? (audio.play(), document.getElementById('pBtn').innerText="⏸") : (audio.pause(), document.getElementById('pBtn').innerText="▶"); }
-        function changeS(dir) { currentIdx = (currentIdx + dir + tracks.length) % tracks.length; loadT(currentIdx); }
-
-        // --- JUEGO ---
+        // --- JUEGO STARFLIGHT ---
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         let gameActive = false, score = 0, keys = {}, bullets = [], enemies = [];
@@ -196,10 +225,12 @@
 
         function startGame() {
             gameActive = true; score = 0; enemies = []; bullets = [];
+            player.x = 160;
             document.getElementById('scoreVal').innerText = "SCORE: 0";
-            if(!audio.src) loadT(currentIdx);
             if(window.spawnInt) clearInterval(window.spawnInt);
-            window.spawnInt = setInterval(() => { if(gameActive) enemies.push({x:Math.random()*320, y:-30, s:3.2}); }, 900);
+            window.spawnInt = setInterval(() => { 
+                if(gameActive) enemies.push({x:Math.random()*320, y:-30, s:3.5}); 
+            }, 850);
             gameLoop();
         }
 
@@ -207,24 +238,40 @@
 
         function gameLoop() {
             if(!gameActive) return;
+
+            // Controles de teclado
             if(keys['ArrowLeft'] && player.x > 0) player.x -= 6;
             if(keys['ArrowRight'] && player.x < 320) player.x += 6;
 
             ctx.fillStyle = "#000"; ctx.fillRect(0,0,350,420);
+            
+            // Balas
             bullets.forEach((b, i) => {
                 b.y -= b.s; ctx.fillStyle = "#ff4444"; ctx.fillRect(b.x, b.y, 4, 12);
                 if(b.y < 0) bullets.splice(i, 1);
             });
+
+            // Enemigos y Colisiones
             enemies.forEach((e, i) => {
-                e.y += e.s; ctx.fillStyle = "#00ff41"; ctx.fillRect(e.x, e.y, 30, 30);
+                e.y += e.s; 
+                ctx.fillStyle = "#00ff41"; 
+                ctx.fillRect(e.x, e.y, 30, 30);
+                
                 bullets.forEach((b, bi) => {
                     if(b.x > e.x && b.x < e.x+30 && b.y > e.y && b.y < e.y+30) {
                         enemies.splice(i, 1); bullets.splice(bi, 1);
                         score += 10; document.getElementById('scoreVal').innerText = "SCORE: " + score;
                     }
                 });
-                if(e.y > 420) { stopGame(); alert("FIN DEL JUEGO"); nav('menu'); }
+
+                if(e.y > 420) { 
+                    stopGame(); 
+                    alert("GAME OVER\nTu puntaje: " + score); 
+                    nav('menu'); 
+                }
             });
+
+            // Nave
             ctx.fillStyle = "#fff"; ctx.fillRect(player.x, player.y, 30, 30);
             requestAnimationFrame(gameLoop);
         }
