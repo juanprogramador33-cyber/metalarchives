@@ -137,144 +137,142 @@
     </div>
 
     <script>
-        const audio = document.getElementById('mainAudio');
-        const tracks = [
-            {t:"The Trooper", a:"Iron Maiden", f:"thetrooper.mp3"},
-            {t:"Painkiller", a:"Judas Priest", f:"painkiller.mp3"},
-            {t:"Holy Diver", a:"Dio", f:"holydiver.mp3"},
-            {t:"War Pigs", a:"Black Sabbath", f:"warpigs.mp3"}
-        ];
-        let currentIdx = 0;
+    const audio = document.getElementById('mainAudio');
+    const tracks = [
+        {t:"The Trooper", a:"Iron Maiden", f:"thetrooper.mp3"},
+        {t:"Painkiller", a:"Judas Priest", f:"painkiller.mp3"},
+        {t:"Holy Diver", a:"Dio", f:"holydiver.mp3"},
+        {t:"War Pigs", a:"Black Sabbath", f:"warpigs.mp3"}
+    ];
+    let currentIdx = 0;
 
-        // --- NAVEGACIÓN ---
-        function nav(id) {
-            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            
-            const pBar = document.getElementById('player');
-            if(id === 'welcome') {
-                pBar.style.display = 'none';
-            } else {
-                pBar.style.display = 'flex';
-                if(!audio.src) loadT(currentIdx); // Carga la primera al entrar
-            }
+    // --- NAVEGACIÓN DE VISTAS ---
+    function nav(id) {
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        
+        const pBar = document.getElementById('player');
+        if(id === 'welcome') {
+            pBar.style.display = 'none';
+        } else {
+            pBar.style.display = 'flex';
+            // Carga inicial solo si no hay nada configurado
+            if(!audio.src || audio.src === "") loadT(currentIdx);
         }
+    }
 
-        // --- REPRODUCTOR DE AUDIO ---
-        function loadT(i) {
-            const s = tracks[i];
-            document.getElementById('playTitle').innerText = s.t;
-            document.getElementById('playArtist').innerText = s.a;
-            
-            audio.pause();
-            audio.src = s.f;
-            audio.load(); 
-            audio.play().then(() => {
+    // --- REPRODUCTOR DE AUDIO (CORREGIDO PARA CAMBIO INMEDIATO) ---
+    function loadT(i) {
+        const s = tracks[i];
+        
+        // Actualizar UI
+        document.getElementById('playTitle').innerText = s.t;
+        document.getElementById('playArtist').innerText = s.a;
+        
+        // Reinicio total del objeto audio para forzar el cambio
+        audio.pause();
+        audio.removeAttribute('src'); // Elimina la fuente actual
+        audio.load();                // Limpia el buffer
+        
+        audio.src = s.f;             // Asigna la nueva canción
+        audio.load();                // Prepara la nueva canción
+        
+        // Reproducción forzada
+        const playPromise = audio.play();
+        
+        if (playPromise !== undefined) {
+            playPromise.then(() => {
                 document.getElementById('pBtn').innerText = "⏸";
-            }).catch(e => console.log("Interacción requerida para audio"));
-        }
-
-        function pausePlay() {
-            if (audio.paused) {
-                audio.play();
-                document.getElementById('pBtn').innerText = "⏸";
-            } else {
-                audio.pause();
+            }).catch(e => {
+                console.log("Esperando interacción del usuario...");
                 document.getElementById('pBtn').innerText = "▶";
-            }
-        }
-
-        function changeS(dir) {
-            currentIdx = (currentIdx + dir + tracks.length) % tracks.length;
-            loadT(currentIdx);
-        }
-
-        // --- TRADUCTOR (SOLO INGLÉS) ---
-        async function runTranslation() {
-            const text = document.getElementById('sourceText').value;
-            const box = document.getElementById('resultText');
-            if(!text) return;
-            box.innerText = "Traduciendo...";
-            try {
-                // langpair=es|en asegura que siempre traduzca de español a inglés
-                const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=es|en`);
-                const data = await res.json();
-                box.innerText = data.responseData.translatedText;
-            } catch (e) { box.innerText = "Error de conexión."; }
-        }
-
-        // --- SINTETIZADOR DE VOZ ---
-        function speak() {
-            window.speechSynthesis.cancel();
-            const speech = new SpeechSynthesisUtterance(document.getElementById('hText').innerText);
-            speech.lang = 'es-ES';
-            speech.rate = 0.9;
-            window.speechSynthesis.speak(speech);
-        }
-
-        // --- JUEGO STARFLIGHT ---
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        let gameActive = false, score = 0, keys = {}, bullets = [], enemies = [];
-        let player = { x: 160, y: 360, w: 30, h: 30 };
-
-        window.onkeydown = e => keys[e.code] = true;
-        window.onkeyup = e => keys[e.code] = false;
-
-        function shoot() { if(gameActive) bullets.push({ x: player.x+13, y: player.y, s: 9 }); }
-
-        function startGame() {
-            gameActive = true; score = 0; enemies = []; bullets = [];
-            player.x = 160;
-            document.getElementById('scoreVal').innerText = "SCORE: 0";
-            if(window.spawnInt) clearInterval(window.spawnInt);
-            window.spawnInt = setInterval(() => { 
-                if(gameActive) enemies.push({x:Math.random()*320, y:-30, s:3.5}); 
-            }, 850);
-            gameLoop();
-        }
-
-        function stopGame() { gameActive = false; clearInterval(window.spawnInt); }
-
-        function gameLoop() {
-            if(!gameActive) return;
-
-            // Controles de teclado
-            if(keys['ArrowLeft'] && player.x > 0) player.x -= 6;
-            if(keys['ArrowRight'] && player.x < 320) player.x += 6;
-
-            ctx.fillStyle = "#000"; ctx.fillRect(0,0,350,420);
-            
-            // Balas
-            bullets.forEach((b, i) => {
-                b.y -= b.s; ctx.fillStyle = "#ff4444"; ctx.fillRect(b.x, b.y, 4, 12);
-                if(b.y < 0) bullets.splice(i, 1);
             });
+        }
+    }
 
-            // Enemigos y Colisiones
-            enemies.forEach((e, i) => {
-                e.y += e.s; 
-                ctx.fillStyle = "#00ff41"; 
-                ctx.fillRect(e.x, e.y, 30, 30);
-                
-                bullets.forEach((b, bi) => {
-                    if(b.x > e.x && b.x < e.x+30 && b.y > e.y && b.y < e.y+30) {
-                        enemies.splice(i, 1); bullets.splice(bi, 1);
-                        score += 10; document.getElementById('scoreVal').innerText = "SCORE: " + score;
-                    }
-                });
+    function pausePlay() {
+        if (audio.paused) {
+            audio.play();
+            document.getElementById('pBtn').innerText = "⏸";
+        } else {
+            audio.pause();
+            document.getElementById('pBtn').innerText = "▶";
+        }
+    }
 
-                if(e.y > 420) { 
-                    stopGame(); 
-                    alert("GAME OVER\nTu puntaje: " + score); 
-                    nav('menu'); 
+    function changeS(dir) {
+        currentIdx = (currentIdx + dir + tracks.length) % tracks.length;
+        loadT(currentIdx); // Llama a la carga inmediata
+    }
+
+    // --- TRADUCTOR ---
+    async function runTranslation() {
+        const text = document.getElementById('sourceText').value;
+        const box = document.getElementById('resultText');
+        if(!text) return;
+        box.innerText = "Translating...";
+        try {
+            const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=es|en`);
+            const data = await res.json();
+            box.innerText = data.responseData.translatedText;
+        } catch (e) { box.innerText = "Error."; }
+    }
+
+    // --- VOZ ---
+    function speak() {
+        window.speechSynthesis.cancel();
+        const speech = new SpeechSynthesisUtterance(document.getElementById('hText').innerText);
+        speech.lang = 'es-ES';
+        window.speechSynthesis.speak(speech);
+    }
+
+    // --- JUEGO (DPAD & FIRE) ---
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    let gameActive = false, score = 0, keys = {}, bullets = [], enemies = [];
+    let player = { x: 160, y: 360, w: 30, h: 30 };
+
+    window.onkeydown = e => keys[e.code] = true;
+    window.onkeyup = e => keys[e.code] = false;
+
+    function shoot() { if(gameActive) bullets.push({ x: player.x+13, y: player.y, s: 9 }); }
+
+    function startGame() {
+        gameActive = true; score = 0; enemies = []; bullets = [];
+        player.x = 160;
+        document.getElementById('scoreVal').innerText = "SCORE: 0";
+        if(window.spawnInt) clearInterval(window.spawnInt);
+        window.spawnInt = setInterval(() => { 
+            if(gameActive) enemies.push({x:Math.random()*320, y:-30, s:3.5}); 
+        }, 850);
+        gameLoop();
+    }
+
+    function stopGame() { gameActive = false; clearInterval(window.spawnInt); }
+
+    function gameLoop() {
+        if(!gameActive) return;
+        if(keys['ArrowLeft'] && player.x > 0) player.x -= 7;
+        if(keys['ArrowRight'] && player.x < 320) player.x += 7;
+
+        ctx.fillStyle = "#000"; ctx.fillRect(0,0,350,420);
+        bullets.forEach((b, i) => {
+            b.y -= b.s; ctx.fillStyle = "red"; ctx.fillRect(b.x, b.y, 4, 12);
+            if(b.y < 0) bullets.splice(i, 1);
+        });
+        enemies.forEach((e, i) => {
+            e.y += e.s; ctx.fillStyle = "#00ff41"; ctx.fillRect(e.x, e.y, 30, 30);
+            bullets.forEach((b, bi) => {
+                if(b.x > e.x && b.x < e.x+30 && b.y > e.y && b.y < e.y+30) {
+                    enemies.splice(i, 1); bullets.splice(bi, 1);
+                    score += 10; document.getElementById('scoreVal').innerText = "SCORE: " + score;
                 }
             });
-
-            // Nave
-            ctx.fillStyle = "#fff"; ctx.fillRect(player.x, player.y, 30, 30);
-            requestAnimationFrame(gameLoop);
-        }
-    </script>
+            if(e.y > 420) { stopGame(); alert("FIN DEL JUEGO"); nav('menu'); }
+        });
+        ctx.fillStyle = "#fff"; ctx.fillRect(player.x, player.y, 30, 30);
+        requestAnimationFrame(gameLoop);
+    }
+</script>
 </body>
 </html>
